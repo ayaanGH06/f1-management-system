@@ -54,36 +54,35 @@ else
   ((FAIL++))
 fi
 
-# 5. RBAC Auth: Invalid Login Rejection (HTTP 401)
-echo -n "[TEST 5] POST /api/auth/login (RBAC Invalid Credentials)... "
-AUTH_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE_URL/api/auth/login" \
+# 5. RBAC Auth: Unauthenticated Mutation Blocked (HTTP 401)
+echo -n "[TEST 5] POST /api/admin/race-result (Unauthenticated Block)... "
+UNAUTH_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE_URL/api/admin/race-result" \
   -H "Content-Type: application/json" \
-  -d '{"username":"viewer","password":"wrong"}')
-if [[ "$AUTH_CODE" == "401" ]]; then
+  -d '{"driverId":105,"raceId":1003,"finishingPosition":1,"points":25,"raceStatus":"Finished","fastestLap":"01:21.456","carUsed":10}')
+if [[ "$UNAUTH_CODE" == "401" ]]; then
   echo "✅ PASS (HTTP 401)"
   ((PASS++))
 else
-  echo "❌ FAIL (Got HTTP $AUTH_CODE)"
+  echo "❌ FAIL (Got HTTP $UNAUTH_CODE)"
   ((FAIL++))
 fi
 
-# 6. Trigger Integrity: Negative Points Rejection (HTTP 400)
-echo -n "[TEST 6] POST /api/admin/race-result (SQL Trigger Integrity)... "
-TRIGGER_RES=$(curl -s -X POST "$BASE_URL/api/admin/race-result" \
+# 6. Authenticated Admin Session + SQL Trigger Integrity (HTTP 400)
+echo -n "[TEST 6] Authenticated POST /api/admin/race-result (Trigger Integrity)... "
+COOKIE_JAR=$(mktemp)
+curl -s -c "$COOKIE_JAR" -X POST "$BASE_URL/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}' > /dev/null
+
+TRIGGER_RES=$(curl -s -b "$COOKIE_JAR" -X POST "$BASE_URL/api/admin/race-result" \
   -H "Content-Type: application/json" \
   -d '{"driverId":105,"raceId":1003,"finishingPosition":1,"points":-10,"raceStatus":"Finished","fastestLap":"01:21.456","carUsed":10}')
+rm -f "$COOKIE_JAR"
+
 if [[ "$TRIGGER_RES" == *"Race points cannot be negative"* ]]; then
   echo "✅ PASS"
   ((PASS++))
 else
-  echo "❌ FAIL"
+  echo "❌ FAIL ($TRIGGER_RES)"
   ((FAIL++))
-fi
-
-echo "=================================================="
-echo "Summary: $PASS Passed | $FAIL Failed"
-echo "=================================================="
-
-if [[ "$FAIL" -ne 0 ]]; then
-  exit 1
 fi

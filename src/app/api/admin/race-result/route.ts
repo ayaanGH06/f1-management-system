@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { querySQL } from '../../../../lib/db-sql';
+import { requireAdmin } from '../../../../lib/auth';
 
 export async function POST(request: Request) {
   try {
+    const authError = await requireAdmin();
+    if (authError) return authError;
     const body = await request.json();
     const { driverId, raceId, finishingPosition, points, raceStatus, fastestLap, carUsed } = body;
 

@@ -14,8 +14,8 @@ INSERT INTO DRIVER (Driver_ID, Driver_Name, Nationality, Date_Of_Birth) VALUES
 (101, 'Max Verstappen', 'Dutch', '1997-09-30'),
 (102, 'Charles Leclerc', 'Monegasque', '1997-10-16'),
 (103, 'Lewis Hamilton', 'British', '1985-01-07'),
-(104, 'Lando Norris', 'British', '1999-11-13');
-
+(104, 'Lando Norris', 'British', '1999-11-13'),
+(105, 'Carlos Sainz', 'Spanish', '1994-09-01');
 -- 3. CARS (Car_ID, Car_Model, Manufacturing_Year, Engine_Manufacturer, Team_ID)
 INSERT INTO CAR (Car_ID, Car_Model, Manufacturing_Year, Engine_Manufacturer, Team_ID) VALUES
 (10, 'RB20', 2024, 'Honda RBPT', 1),
@@ -23,10 +23,10 @@ INSERT INTO CAR (Car_ID, Car_Model, Manufacturing_Year, Engine_Manufacturer, Tea
 (30, 'W15', 2024, 'Mercedes', 3),
 (40, 'MCL38', 2024, 'Mercedes', 4);
 
--- 4. SEASONS (Season_ID, Season_Name, Year)
-INSERT INTO SEASON (Season_ID, Season_Name, Year) VALUES
-(1, '2024 Formula 1 World Championship', 2024),
-(2, '2025 Formula 1 World Championship', 2025);
+-- 4. SEASONS (Season_ID, Season_Name, Year, Champion_Team_ID)
+INSERT INTO SEASON (Season_ID, Season_Name, Year, Champion_Team_ID) VALUES
+(1, '2024 Formula 1 World Championship', 2024, 4),
+(2, '2025 Formula 1 World Championship', 2025, NULL);
 
 -- 5. CIRCUITS (Circuit_ID, Circuit_Name, Country, Circuit_Length, Number_Of_Laps)
 INSERT INTO CIRCUIT (Circuit_ID, Circuit_Name, Country, Circuit_Length, Number_Of_Laps) VALUES

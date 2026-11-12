@@ -19,12 +19,10 @@ ORDER BY Total_Constructor_Points DESC;
 
 -- ============================================================================
 -- FEATURE 2: INDEXING - Performance Optimization on Race Results
+-- (Created in 01_ddl_schema.sql: idx_participates_finishing & idx_race_date_season)
 -- ============================================================================
-CREATE INDEX idx_participates_finishing 
-ON PARTICIPATES_IN(Race_ID, Finishing_Position, Points);
-
-CREATE INDEX idx_race_date_season 
-ON RACE(Season_ID, Race_Date);
+SHOW INDEX FROM PARTICIPATES_IN WHERE Key_name = 'idx_participates_finishing';
+SHOW INDEX FROM RACE WHERE Key_name = 'idx_race_date_season';
 
 -- ============================================================================
 -- FEATURE 3: STORED PROCEDURE - Calculate Driver Championship Points
@@ -62,3 +60,12 @@ BEGIN
     END IF;
 END //
 DELIMITER ;
+
+-- ============================================================================
+-- FEATURE 5: DDL ALTER - Schema Evolution & Domain Check Constraint
+-- ============================================================================
+ALTER TABLE DRIVER
+  ADD COLUMN Car_Number INT NULL AFTER Date_Of_Birth;
+
+ALTER TABLE PARTICIPATES_IN
+  ADD CONSTRAINT chk_finishing_position CHECK (Finishing_Position >= 1);
