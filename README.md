@@ -6,10 +6,11 @@ A full-stack Formula 1 Racing Management System demonstrating **Polyglot Persist
 
 ## Tech Stack
 
-- **Frontend & API Layer:** Next.js (App Router), React, TypeScript, Tailwind CSS
+- **Frontend & API Layer:** Next.js 16 (App Router), React, TypeScript, Tailwind CSS
 - **Relational Database (OLTP):** MySQL 8.0 (`Formula_Racing_DB`)
 - **NoSQL Database (Telemetry/Analytics):** MongoDB (`f1_telemetry`)
 - **Database Drivers:** `mysql2` (Connection Pooling), official `mongodb` Node.js driver
+- **Authentication:** HMAC-SHA256 signed HTTP-only session cookies (`src/lib/auth.ts`)
 
 ---
 
@@ -46,14 +47,46 @@ A full-stack Formula 1 Racing Management System demonstrating **Polyglot Persist
 - MongoDB Community Server running on `localhost:27017`
 
 ### 2. Environment Configuration
-Create a `.env.local` file in the project root:
-```env
-SQL_HOST=localhost
-SQL_PORT=3306
-SQL_USER=root
-SQL_PASSWORD=your_mysql_password
-SQL_DATABASE=Formula_Racing_DB
-MONGODB_URI=mongodb://localhost:27017/f1_telemetry
-JWT_SECRET=replace-with-strong-random-secret
-ADMIN_USER=admin
-ADMIN_PASSWORD=admin123
+Create a `.env.local` file in the project root (all variables are required):
+
+    SQL_HOST=localhost
+    SQL_PORT=3306
+    SQL_USER=root
+    SQL_PASSWORD=your_mysql_password
+    SQL_DATABASE=Formula_Racing_DB
+    MONGODB_URI=mongodb://localhost:27017/f1_telemetry
+    JWT_SECRET=replace_with_a_long_random_secret_string
+    ADMIN_USER=admin
+    ADMIN_PASSWORD=replace_with_a_strong_admin_password
+
+### 3. Initialize MySQL Database (`Formula_Racing_DB`)
+Run the DDL schema, seed data, and advanced SQL features scripts in sequence:
+
+    mysql -u root -p < database/sql/01_ddl_schema.sql
+    mysql -u root -p < database/sql/02_dml_seed.sql
+    mysql -u root -p < database/sql/03_advanced_features.sql
+
+### 4. Initialize MongoDB Telemetry Store (`f1_telemetry`)
+Create the validated collection, compound index, and seed documents:
+
+    mongosh "mongodb://localhost:27017/f1_telemetry" < database/nosql/collections_setup.js
+
+Run the standalone aggregation pipeline verification:
+
+    mongosh "mongodb://localhost:27017/f1_telemetry" < database/nosql/aggregation_queries.js
+
+### 5. Install Dependencies & Start the Application
+
+    npm install
+    npm run dev
+
+Open `http://localhost:3000` in your browser:
+- `/` — Public Constructor Standings dashboard
+- `/telemetry` — Live MongoDB Race Telemetry analytics
+- `/admin` — Race Control Admin Portal (full Driver CRUD & Trigger validation)
+
+### 6. Run End-to-End Verification Suite
+With the Next.js server running on `http://localhost:3000`:
+
+    chmod +x scripts/verify-system.sh
+    ./scripts/verify-system.sh

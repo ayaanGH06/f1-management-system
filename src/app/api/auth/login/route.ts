@@ -3,10 +3,17 @@ import { COOKIE_NAME, signSessionToken } from '../../../../lib/auth';
 
 export async function POST(request: Request) {
   try {
-    const { username, password } = await request.json();
+    const validUser = process.env.ADMIN_USER;
+    const validPass = process.env.ADMIN_PASSWORD;
 
-    const validUser = process.env.ADMIN_USER || 'admin';
-    const validPass = process.env.ADMIN_PASSWORD || 'admin123';
+    if (!validUser || !validPass) {
+      return NextResponse.json(
+        { success: false, error: 'Server misconfiguration: Admin credentials are not configured.' },
+        { status: 500 }
+      );
+    }
+
+    const { username, password } = await request.json();
 
     if (username === validUser && password === validPass) {
       const token = signSessionToken({ username, role: 'Admin' });
