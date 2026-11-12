@@ -2,11 +2,10 @@ USE Formula_Racing_DB;
 
 -- ============================================================================
 -- FEATURE 1: VIEW - Constructor (Team) Standings Leaderboard
--- Aggregates total points earned by all drivers for each team across races.
 -- ============================================================================
 DROP VIEW IF EXISTS v_ConstructorStandings;
 CREATE VIEW v_ConstructorStandings AS
-SELECT
+SELECT 
     t.Team_ID,
     t.Team_Name,
     t.Team_Principal,
@@ -20,23 +19,21 @@ ORDER BY Total_Constructor_Points DESC;
 
 -- ============================================================================
 -- FEATURE 2: INDEXING - Performance Optimization on Race Results
--- Optimizes leaderboard filtering by Driver, Race, and Finishing Position.
 -- ============================================================================
-CREATE INDEX idx_participates_finishing
+CREATE INDEX idx_participates_finishing 
 ON PARTICIPATES_IN(Race_ID, Finishing_Position, Points);
 
-CREATE INDEX idx_race_date_season
+CREATE INDEX idx_race_date_season 
 ON RACE(Season_ID, Race_Date);
 
 -- ============================================================================
 -- FEATURE 3: STORED PROCEDURE - Calculate Driver Championship Points
--- Accepts a Driver_ID and returns their detailed points summary.
 -- ============================================================================
 DELIMITER //
 DROP PROCEDURE IF EXISTS sp_GetDriverSummary //
 CREATE PROCEDURE sp_GetDriverSummary(IN p_Driver_ID INT)
 BEGIN
-    SELECT
+    SELECT 
         d.Driver_ID,
         d.Driver_Name,
         d.Nationality,
@@ -52,7 +49,6 @@ DELIMITER ;
 
 -- ============================================================================
 -- FEATURE 4: TRIGGER - Prevent Invalid Points Entry
--- Automatically enforces data integrity by rejecting negative points.
 -- ============================================================================
 DELIMITER //
 DROP TRIGGER IF EXISTS trg_ValidateRacePoints //
