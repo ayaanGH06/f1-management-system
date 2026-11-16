@@ -62,9 +62,9 @@ Create a `.env.local` file in the project root (all variables are required):
 ### 3. Initialize MySQL Database (`Formula_Racing_DB`)
 Run the DDL schema, seed data, and advanced SQL features scripts in sequence:
 
-    mysql -u root -p < database/sql/01_ddl_schema.sql
-    mysql -u root -p < database/sql/02_dml_seed.sql
-    mysql -u root -p < database/sql/03_advanced_features.sql
+    mysql -u root -p --default-character-set=utf8mb4 < database/sql/01_ddl_schema.sql
+    mysql -u root -p --default-character-set=utf8mb4 < database/sql/02_dml_seed.sql
+    mysql -u root -p --default-character-set=utf8mb4 < database/sql/03_advanced_features.sql
 
 ### 4. Initialize MongoDB Telemetry Store (`f1_telemetry`)
 Create the validated collection, compound index, and seed documents:
