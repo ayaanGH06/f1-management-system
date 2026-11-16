@@ -7,7 +7,7 @@ if [ -f .env.local ]; then
   set +a
 fi
 
-BASE_URL="http://localhost:3000"
+BASE_URL="${BASE_URL:-http://localhost:3000}"
 PASS=0
 FAIL=0
 
@@ -17,7 +17,7 @@ echo "=================================================="
 
 # 1. MySQL Stored Procedure Check
 echo -n "[TEST 1] MySQL Stored Procedure (sp_GetDriverSummary)... "
-SQL_OUT=$(mysql -u "${SQL_USER:-root}" -p"${SQL_PASSWORD}" "${SQL_DATABASE:-Formula_Racing_DB}" -N -e "CALL sp_GetDriverSummary(103);")
+SQL_OUT=$(mysql -h "${SQL_HOST:-localhost}" -P "${SQL_PORT:-3306}" --default-character-set=utf8mb4 -u "${SQL_USER:-root}" -p"${SQL_PASSWORD}" "${SQL_DATABASE:-Formula_Racing_DB}" -N -e "CALL sp_GetDriverSummary(103);")
 if [[ "$SQL_OUT" == *"Lewis Hamilton"* ]]; then
   echo "✅ PASS"
   PASS=$((PASS + 1))
