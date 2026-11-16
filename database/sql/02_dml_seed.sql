@@ -1,3 +1,7 @@
+-- Interpret string literals as UTF-8 regardless of the client default
+-- character set (protects values like 'Frederic' with accents).
+/*!50503 SET NAMES utf8mb4 */;
+
 USE Formula_Racing_DB;
 
 SET FOREIGN_KEY_CHECKS = 0;
