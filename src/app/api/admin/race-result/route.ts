@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { errorMessage } from '../../../../lib/errors';
 import { querySQL } from '../../../../lib/db-sql';
 import { requireAdmin } from '../../../../lib/auth';
 
@@ -20,10 +21,10 @@ export async function POST(request: Request) {
       success: true,
       message: `Race result logged successfully for Driver #${driverId}!`,
     });
-  } catch (error: any) {
+  } catch (error) {
     // Captures MySQL Trigger SIGNAL SQLSTATE '45000' rejection
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: errorMessage(error) },
       { status: 400 }
     );
   }
