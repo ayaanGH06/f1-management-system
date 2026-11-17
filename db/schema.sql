@@ -55,7 +55,7 @@ CREATE TABLE PARTICIPATES_IN (
   Finishing_Position INT,
   Points DECIMAL(5,2),
   Race_Status VARCHAR(50) NOT NULL DEFAULT 'Finished',
-  Fastest_Lap TIME,
+  Fastest_Lap TIME(3),
   Car_Used INT,
   PRIMARY KEY (Driver_ID, Race_ID),
   UNIQUE (Race_ID, Finishing_Position),
@@ -89,7 +89,7 @@ ALTER TABLE DRIVER ADD FULLTEXT INDEX ft_driver_name (Driver_Name);
 DROP VIEW IF EXISTS v_driver_standings;
 CREATE VIEW v_driver_standings AS
 SELECT d.Driver_ID, d.Driver_Name, s.Year, SUM(p.Points) AS Total_Points,
-       SUM(p.Finishing_Position = 1) AS Wins, COUNT(*) AS Races
+       COALESCE(SUM(p.Finishing_Position = 1), 0) AS Wins, COUNT(*) AS Races
 FROM PARTICIPATES_IN p
 JOIN DRIVER d ON d.Driver_ID = p.Driver_ID
 JOIN RACE r ON r.Race_ID = p.Race_ID
@@ -110,7 +110,7 @@ CREATE TRIGGER trg_points_upd BEFORE UPDATE ON PARTICIPATES_IN FOR EACH ROW
 BEGIN SET NEW.Points = fn_points(NEW.Finishing_Position, NEW.Race_Status); END//
 
 CREATE PROCEDURE sp_record_result(IN p_driver INT, IN p_race INT, IN p_pos INT,
-  IN p_status VARCHAR(50), IN p_lap TIME, IN p_car INT)
+  IN p_status VARCHAR(50), IN p_lap TIME(3), IN p_car INT)
 BEGIN
   DECLARE v_season INT; DECLARE v_ok INT;
   DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; RESIGNAL; END;
