@@ -10,7 +10,7 @@ A full-stack Formula 1 Racing Management System demonstrating **Polyglot Persist
 - **Relational Database (OLTP):** MySQL 8.0 (`Formula_Racing_DB`)
 - **NoSQL Database (Telemetry/Analytics):** MongoDB (`f1_telemetry`)
 - **Database Drivers:** `mysql2` (Connection Pooling), official `mongodb` Node.js driver
-- **Authentication:** HMAC-SHA256 signed HTTP-only session cookies (`src/lib/auth.ts`)
+- **Authentication & Roles:** HMAC-SHA256 signed HTTP-only session cookies (`src/lib/auth.ts`) with two roles: **Admin** (full INSERT/UPDATE/DELETE) and **Viewer** (read-only roster; every write API returns 403)
 
 ---
 
@@ -47,7 +47,7 @@ A full-stack Formula 1 Racing Management System demonstrating **Polyglot Persist
 - MongoDB Community Server running on `localhost:27017`
 
 ### 2. Environment Configuration
-Create a `.env.local` file in the project root (all variables are required):
+Create a `.env.local` file in the project root (all variables are required except `VIEWER_USER` / `VIEWER_PASSWORD`, which enable the read-only Viewer role):
 
     SQL_HOST=localhost
     SQL_PORT=3306
@@ -58,6 +58,8 @@ Create a `.env.local` file in the project root (all variables are required):
     JWT_SECRET=replace_with_a_long_random_secret_string
     ADMIN_USER=admin
     ADMIN_PASSWORD=replace_with_a_strong_admin_password
+    VIEWER_USER=viewer
+    VIEWER_PASSWORD=replace_with_a_strong_viewer_password
 
 ### 3. Initialize MySQL Database (`Formula_Racing_DB`)
 Run the DDL schema, seed data, and advanced SQL features scripts in sequence:
