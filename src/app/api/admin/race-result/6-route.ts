@@ -1,0 +1,31 @@
+import { NextResponse } from 'next/server';
+import { errorMessage } from '../../../../lib/errors';
+import { querySQL } from '../../../../lib/db-sql';
+import { requireAdmin } from '../../../../lib/auth';
+
+export async function POST(request: Request) {
+  try {
+    const authError = await requireAdmin();
+    if (authError) return authError;
+    const body = await request.json();
+    const { driverId, raceId, finishingPosition, points, raceStatus, fastestLap, carUsed } = body;
+
+    // Execute INSERT INTO PARTICIPATES_IN (Triggers trg_ValidateRacePoints BEFORE INSERT)
+    await querySQL(
+      `INSERT INTO PARTICIPATES_IN (Driver_ID, Race_ID, Finishing_Position, Points, Race_Status, Fastest_Lap, Car_Used)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [driverId, raceId, finishingPosition, points, raceStatus, fastestLap, carUsed]
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: `Race result logged successfully for Driver #${driverId}!`,
+    });
+  } catch (error) {
+    // Captures MySQL Trigger SIGNAL SQLSTATE '45000' rejection
+    return NextResponse.json(
+      { success: false, error: errorMessage(error) },
+      { status: 400 }
+    );
+  }
+}
