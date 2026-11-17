@@ -12,9 +12,11 @@ function getSecret(): string {
   return secret;
 }
 
+export type Role = 'Admin' | 'Viewer';
+
 interface SessionPayload {
   username: string;
-  role: 'Admin';
+  role: Role;
   exp: number;
 }
 
@@ -55,7 +57,7 @@ export function verifySessionToken(token: string): SessionPayload | null {
   }
 }
 
-export async function requireAdmin(): Promise<NextResponse | null> {
+async function requireRole(allowed: Role[], label: string): Promise<NextResponse | null> {
   if (!process.env.JWT_SECRET) {
     return NextResponse.json(
       { success: false, error: 'Server misconfiguration: JWT_SECRET is not configured.' },
@@ -68,20 +70,38 @@ export async function requireAdmin(): Promise<NextResponse | null> {
 
   if (!token) {
     return NextResponse.json(
-      { success: false, error: 'Unauthorized: Admin session required.' },
+      { success: false, error: `Unauthorized: ${label} session required.` },
       { status: 401 }
     );
   }
 
   const session = verifySessionToken(token);
-  if (!session || session.role !== 'Admin') {
+  if (!session || !allowed.includes(session.role)) {
     return NextResponse.json(
-      { success: false, error: 'Forbidden: Invalid or expired Admin role.' },
+      { success: false, error: `Forbidden: ${label} role required.` },
       { status: 403 }
     );
   }
 
   return null;
+}
+
+// Write operations (INSERT / UPDATE / DELETE): Admin only.
+export async function requireAdmin(): Promise<NextResponse | null> {
+  return requireRole(['Admin'], 'Admin');
+}
+
+// Read-only operations behind login: Admin or Viewer.
+export async function requireUser(): Promise<NextResponse | null> {
+  return requireRole(['Admin', 'Viewer'], 'Authenticated');
+}
+
+export async function getSessionRole(): Promise<Role | null> {
+  if (!process.env.JWT_SECRET) return null;
+  const cookieStore = await cookies();
+  const token = cookieStore.get(COOKIE_NAME)?.value;
+  if (!token) return null;
+  return verifySessionToken(token)?.role ?? null;
 }
 
 export { COOKIE_NAME };
