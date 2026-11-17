@@ -12,6 +12,7 @@ interface Driver {
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [role, setRole] = useState<'Admin' | 'Viewer'>('Admin');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -40,12 +41,14 @@ export default function AdminPage() {
       const data = await res.json();
       if (data.success) {
         setIsAuthenticated(true);
+        setRole(data.role === 'Viewer' ? 'Viewer' : 'Admin');
         setDrivers(data.drivers);
       }
     }
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchDrivers();
   }, []);
 
@@ -201,7 +204,9 @@ export default function AdminPage() {
             <div className="flex justify-between items-center bg-slate-900 border border-slate-800 p-4 rounded-lg">
               <div>
                 <span className="text-sm text-slate-400">Authenticated Session: </span>
-                <span className="font-bold text-emerald-400">Race Director (Admin Role — HTTP-Only Cookie)</span>
+                <span className="font-bold text-emerald-400">
+                  {role === 'Admin' ? 'Race Director (Admin Role — HTTP-Only Cookie)' : 'Race Viewer (Viewer Role, read-only — HTTP-Only Cookie)'}
+                </span>
               </div>
               <button
                 onClick={handleLogout}
@@ -213,7 +218,7 @@ export default function AdminPage() {
 
             {/* DRIVER ROSTER TABLE (SELECT / UPDATE / DELETE) */}
             <div className="bg-slate-900 border border-slate-800 p-6 rounded-lg shadow-xl">
-              <h2 className="text-xl font-bold mb-4 text-white">Registered Drivers (MySQL SELECT / UPDATE / DELETE)</h2>
+              <h2 className="text-xl font-bold mb-4 text-white">{role === 'Admin' ? 'Registered Drivers (MySQL SELECT / UPDATE / DELETE)' : 'Registered Drivers (MySQL SELECT, read-only)'}</h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead className="border-b border-slate-800 text-slate-400">
@@ -222,7 +227,7 @@ export default function AdminPage() {
                       <th className="py-2 px-3">Name</th>
                       <th className="py-2 px-3">Nationality</th>
                       <th className="py-2 px-3">DOB</th>
-                      <th className="py-2 px-3 text-right">Actions</th>
+                      {role === 'Admin' && <th className="py-2 px-3 text-right">Actions</th>}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800">
@@ -232,7 +237,7 @@ export default function AdminPage() {
                         <td className="py-2 px-3 font-semibold">{d.Driver_Name}</td>
                         <td className="py-2 px-3">{d.Nationality}</td>
                         <td className="py-2 px-3">{d.Date_Of_Birth}</td>
-                        <td className="py-2 px-3 text-right space-x-2">
+                        {role === 'Admin' && <td className="py-2 px-3 text-right space-x-2">
                           <button
                             type="button"
                             onClick={() => startEditDriver(d)}
@@ -247,7 +252,7 @@ export default function AdminPage() {
                           >
                             Delete
                           </button>
-                        </td>
+                        </td>}
                       </tr>
                     ))}
                   </tbody>
@@ -255,6 +260,7 @@ export default function AdminPage() {
               </div>
             </div>
 
+            {role === 'Admin' && (<>
             {/* FORM 1: ADD / EDIT DRIVER (INSERT / UPDATE) */}
             <div className="bg-slate-900 border border-slate-800 p-6 rounded-lg shadow-xl">
               <h2 className="text-xl font-bold mb-4 text-white">
@@ -411,6 +417,7 @@ export default function AdminPage() {
                 </div>
               </form>
             </div>
+            </>)}
           </div>
         )}
       </div>
