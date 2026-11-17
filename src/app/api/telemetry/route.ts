@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { errorMessage } from '../../../lib/errors';
 import { getMongoDb } from '../../../lib/db-mongo';
 
 export async function GET(request: Request) {
@@ -35,9 +36,9 @@ export async function GET(request: Request) {
     ]).toArray();
 
     return NextResponse.json({ success: true, data: telemetrySummary });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: errorMessage(error) },
       { status: 500 }
     );
   }
